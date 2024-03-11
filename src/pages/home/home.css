@@ -1,0 +1,62 @@
+.home-wrapper {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  background-color: #5c6f24;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo {
+  width: 400px; /* Adjust based on your logo's dimensions */
+  transition: transform 0.3s ease;
+  height: auto;
+  position: absolute;
+  bottom: 50%;
+}
+
+.phone-warning {
+  font-size: 15px;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.7);
+  padding: 10px;
+  border-radius: 8px;
+  margin: 20px;
+}
+
+.content .container {
+  text-align: center;
+  margin-top: -20vh; /* Adjust based on layout */
+}
+
+.line {
+  height: 2px;
+  background: white;
+  width: 80%;
+  margin: 20px auto;
+  transition: all 0.5s ease;
+}
+
+#banner .inner h2, #banner .inner p {
+  color: rgb(255, 255, 255);
+
+  margin: 10px 0;
+}
+
+.contact-button button {
+  background-color: #ffcc00; /* Example button color */
+  border: none;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-top: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.contact-button button:hover {
+  background-color: #e6b800; /* Darker shade for hover effect */
+}
