@@ -21,6 +21,8 @@ export const Console = () => {
     const [negativeCount, setNegativeCount] = useState(0);
 
     const progressRef = useRef(null);
+    const isFirstLoad = useRef(true);
+
 
 
 
@@ -31,41 +33,74 @@ export const Console = () => {
 
     };
 
+    const startAnalysis = async () => {
+        const response = await analyzeText();
+        try{
+           
+            highlightText(data);
+        
+        }
+        catch (error) {
+        }
+        
+        
+        
+    };
+
     // Calls a Options API to analyze the text
     const analyzeText = async () => {
+        if (!isFirstLoad.current) {
         startAnimation();
         // Split the text by periods and turn into an array of sentences
-        const plainTextProcessed = plainText.split('.').map((sentence) => sentence.trim());
+        let plainTextProcessed = plainText.split('.').map((sentence) => sentence.trim());
+        // Remove special characters from the text
+
+       
+
         if (plainText.length > 0) {
-
             try {
-                const response = await fetch('https://iv4i8ilxs4.execute-api.us-east-1.amazonaws.com/Dev/requ', {
-                    method: 'OPTIONS', // Change method to POST
-
+                const response =  await fetch('https://iv4i8ilxs4.execute-api.us-east-1.amazonaws.com/Dev/requ', {
+                    method: 'OPTIONS', // Use the OPTIONS method to check if the API is available
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ "input_text": plainTextProcessed }),
                 });
+                
 
-                if (!response.ok) {
-                    throw new Error('Failed to fetch');
-                }
+                // Response will take 20 seconds to return
 
-                // Get the preview
+                // Keep the response preview in the console
+                console.log(response);
 
-                setData(JSON.parse(JSON.stringify(await response.json())));
-                console.log(data);
-                highlightText();
 
+    
+                // Get the response preview not the entire response    
+                const responseData = await response.json(); // Await the entire response
+
+                console.log(responseData);
+                highlightText(responseData);
+              
             } catch (error) {
                 console.error('Error:', error.message);
             }
-            highlightText();
         }
+    
+        // Return null if the analysis cannot be performed
+        return null;
+    }
     };
+
+    
+
     const quillRef = useRef(null);
-    const highlightText = () => {
+    const highlightText = (responseData) => {
+
+        if (responseData['predicted_sentiment'] === undefined) {
+            return;
+        }
+
+        console.log("highlightText");
         const quill = quillRef.current.getEditor();
         quill.format('color', 'black');
 
@@ -75,9 +110,11 @@ export const Console = () => {
         const textProcessed = text.split('.').map((sentence) => sentence.trim());
         let indexOffset = 0;
 
+        responseData = responseData['predicted_sentiment'];
+
 
         const regexPattern = /\d/g;
-        const matches = data.predicted_sentiment.match(regexPattern);
+        const matches = responseData.match(regexPattern);
 
         // Add to Positive and Negative Count
         let positive = 0;
@@ -125,6 +162,7 @@ export const Console = () => {
     };
     
     const startAnimation = () => {
+        if (!isFirstLoad.current) {
         setAnimationActive(true);
         progressRef.current.style.animation = 'none'; // Reset animation
         void progressRef.current.offsetWidth; // Trigger reflow
@@ -132,9 +170,27 @@ export const Console = () => {
         // Set the animation to false after 20 seconds
         setTimeout(() => {
             setAnimationActive(false);
-        }, 30000);
+        }, 0);
+    }
     };
 
+    useEffect(() => {
+        // Clear response data when the text changes
+        setData([]);
+        // Add an event listener to the window to detect when the screen is resized
+        
+            // Check if the screen is a phone
+            progressRef.current.style.animation = 'none'; // Reset animation
+            void progressRef.current.offsetWidth
+            progressRef.current.style.animation = 'fill-up 1s linear forwards';
+        
+
+        // Set isFirstLoad to false after the initial animation
+        setTimeout(() => {
+            isFirstLoad.current = false;
+        }, 1000); // Assuming initial animation duration is 1 second
+    }, []);
+ 
 
 
 
@@ -149,7 +205,7 @@ export const Console = () => {
                         <div style={{ position: 'relative' }}>
                             <ReactQuill style={{ height: '70vh', backgroundColor: 'white' }} theme="snow" value={text} onChange={handleChange} ref={quillRef} />
                             {/* Position the button to the left corner */}
-                            {!animationActive ? <button style={{ position: 'absolute', bottom: '15vh', right: '2vw', height: '5vh', borderStyle: 'solid', borderRadius: '5px' }} onClick={analyzeText} >Analyze</button>: <div></div>}
+                            {!animationActive ? <button style={{ position: 'absolute', bottom: '15vh', right: '2vw', height: '5vh', borderStyle: 'solid', borderRadius: '5px' }} onClick={startAnalysis} >Analyze</button>: <div></div>}
                             <div className="progress-container">
                                 <div ref={progressRef} className={`progress-bar ${animationActive ? 'active' : ''}`} />
                             </div>
